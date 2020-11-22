@@ -1,0 +1,8 @@
+func f(x: number) <- x
+
+func g(x) <- x
+
+func h(f, x) <- f(x)
+
+
+h((a) <- g(a+b), b*c) * f(2-1) > 1 | f(x) < 2 | 2^3 == 8
