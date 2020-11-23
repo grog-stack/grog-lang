@@ -2,26 +2,26 @@ grammar Grog;
 
 program: function* expression?;
 
-function: 'func' name=IDENTIFIER lambda;
+function:  FUNC name=IDENTIFIER lambda;
 
 block: expression;
 
 expression
-    : expression '^'<assoc=right> expression
-    | expression ('*' | '/') expression
-    | expression ('+' | '-') expression
-    | expression ('>' | '<' | '>=' | '<=' | '=='| '!=') expression
-    | expression ('&' | '|') expression
-    | '!' expression
-    | name=IDENTIFIER '(' parameters+=expression (',' parameters+=expression)? ')'
+    : expression POWER<assoc=right> expression
+    | expression (TIMES | DIV) expression
+    | expression (PLUS | MINUS) expression
+    | expression (GREATER | LESS | GREATER_OR_EQUAL | LESS_OR_EQUAL | EQUAL | DIFFERENT) expression
+    | expression (AND | OR) expression
+    | NOT expression
+    | name=IDENTIFIER LPAREN parameters+=expression (COMMA parameters+=expression)? RPAREN
     | lambda
     | IDENTIFIER
     | NUMBER
     ;
 
-lambda: '(' (parameters+=parameter (',' parameters+=parameter)* )? ')' '<-' expression;
+lambda: RPAREN (parameters+=parameter (COMMA parameters+=parameter)* )? RPAREN ASSIGN expression;
 
-parameter: name=IDENTIFIER (':' type=typeDeclaration)?;
+parameter: name=IDENTIFIER (COLON type=typeDeclaration)?;
 
 typeDeclaration: IDENTIFIER;
 
@@ -31,21 +31,26 @@ SEMICOLON: ';';
 LPAREN: '(';
 RPAREN: ')';
 DOT: '.';
-GREATER_THAN: '>';
-LESS_THAN: '<';
-GREATER_THAN_OR_EQUAL_TO: '>=';
-LESS_THAN_OR_EQUAL_TO: '<=';
-EQUAL_TO: '==';
-DIFFERNT_FROM: '!=';
+GREATER: '>';
+LESS: '<';
+GREATER_OR_EQUAL: '>=';
+LESS_OR_EQUAL: '<=';
+EQUAL: '==';
+DIFFERNT: '!=';
 NOT: '!';
 TIMES: '*';
 DIVIDE: '/';
 PLUS: '+';
 MINUS: '-';
 POWER: '^';
+ASSIGN: '<-';
+COLON: ':';
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
 NUMBER: DIGIT+ ('.' DIGIT+)?;
 fragment VALID_ID_START: ('a' .. 'z') | ('A' .. 'Z') | '_';
 fragment VALID_ID_CHAR: VALID_ID_START | DIGIT;
 fragment DIGIT: '0' .. '9';
+
 WS: [ \r\n\t] + -> skip;
+COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
+LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN);
