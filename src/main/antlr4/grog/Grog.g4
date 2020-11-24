@@ -11,9 +11,17 @@ expression
     | left=expression (operator=GREATER | operator=LESS | operator=GREATER_OR_EQUAL | operator=LESS_OR_EQUAL | EQUAL | DIFFERENT) right=expression #ComparisonExpr
     | left=expression (operator=AND | operator=OR) right=expression #BooleanExpr
     | NOT value=expression #NegativeExpr
-    | name=IDENTIFIER LPAREN parameters+=expression (COMMA parameters+=expression)? RPAREN #FunctionCallExpr
+    | functionCall #FunctionCallExpr
     | value=lambda #LambdaExpr
-    | value=IDENTIFIER #ReferenceExpr
+    | atom #AtomExpr
+    ;
+
+functionCall
+    : name=IDENTIFIER LPAREN parameters+=expression (COMMA parameters+=expression)? RPAREN
+    ;
+
+atom
+    : value=IDENTIFIER #ReferenceExpr
     | value=NUMBER #NumberExpr
     | value=BOOLEAN #BooleanLiteralExpr
     ;

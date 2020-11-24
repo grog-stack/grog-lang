@@ -118,7 +118,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitFunctionCallExpr(GrogParser.FunctionCallExprContext ctx) {
+    public Object visitFunctionCall(GrogParser.FunctionCallContext ctx) {
         var symbolsTable = new SymbolsTable(symbols.peek());
         var name = ctx.name.getText();
         var evaluable = (Lambda) functions.get(name);
@@ -139,6 +139,11 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         } finally {
             symbols.pop();
         }
+    }
+
+    @Override
+    public Object visitFunctionCallExpr(GrogParser.FunctionCallExprContext ctx) {
+        return ctx.functionCall().accept(this);
     }
 
     @Override
