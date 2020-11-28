@@ -17,6 +17,6 @@ public class App
         var parser = new GrogParser(new CommonTokenStream(lexer));
         var program = parser.program();
         var result = new Interpreter().visitProgram(program);
-        System.out.printf("Result: %s", result != null ? result.toString() : "null");
+        System.out.printf("Result: %s%n", result != null ? result.toString() : "null");
     }
 }

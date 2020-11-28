@@ -1,12 +1,19 @@
 grammar Grog;
 
-program: function* expression?;
+program: (type |function)* expression?;
+
+type: 
+    TYPE name=IDENTIFIER ASSIGN (
+        functions+=function
+        | LBRACE (functions+=function)+ RBRACE
+    )
+    ;
 
 function:  FUNC name=IDENTIFIER lambda;
 
 expression
     : left=expression POWER<assoc=right> right=expression #PowerExpr
-    | left=expression (operator=TIMES | operator=DIV) right=expression #TimesExpr
+    | left=expression (operator=TIMES | operator=DIVIDE) right=expression #TimesExpr
     | left=expression (operator=PLUS | operator=MINUS) right=expression #PlusExpr
     | left=expression (operator=GREATER | operator=LESS | operator=GREATER_OR_EQUAL | operator=LESS_OR_EQUAL | EQUAL | DIFFERENT) right=expression #ComparisonExpr
     | left=expression (operator=AND | operator=OR) right=expression #BooleanExpr
@@ -28,10 +35,13 @@ atom
 
 lambda: LPAREN (parameters+=parameter (COMMA parameters+=parameter)* )? RPAREN ASSIGN expression;
 
-parameter: name=IDENTIFIER (COLON type=typeDeclaration)?;
+parameter: name=IDENTIFIER (COLON typeDecl=typeDeclaration)?;
 
 typeDeclaration: IDENTIFIER;
 
+TYPE: 'type';
+LBRACE: '{';
+RBRACE: '}';
 FUNC: 'func';
 COMMA: ',';
 SEMICOLON: ';';
@@ -43,7 +53,7 @@ LESS: '<';
 GREATER_OR_EQUAL: '>=';
 LESS_OR_EQUAL: '<=';
 EQUAL: '==';
-DIFFERNT: '!=';
+DIFFERENT: '!=';
 NOT: '!';
 TIMES: '*';
 DIVIDE: '/';

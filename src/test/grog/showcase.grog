@@ -9,4 +9,9 @@ func g(x) <- x
 
 func h(f, x) <- f(x)
 
+type T1 <- {
+    func f(x) <- x+1
+    func g(x) <- x+1
+}
+
 h((a) <- g(a+1), 2*3) > 5

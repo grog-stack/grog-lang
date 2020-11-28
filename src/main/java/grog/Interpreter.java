@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import static java.util.stream.Collectors.toSet;
+
+import grog.GrogParser.AtomExprContext;
+import grog.GrogParser.TypeContext;
+
 import static java.util.stream.Collectors.toList;
 
 public class Interpreter extends GrogBaseVisitor<Object> {
@@ -23,10 +28,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 
     @Override
     public Object visitLambda(GrogParser.LambdaContext ctx) {
-        var parameters = ctx.parameters
-                .stream()
-                .map((p) -> (Parameter) p.accept(this))
-                .collect(toList());
+        var parameters = ctx.parameters.stream().map((p) -> (Parameter) p.accept(this)).collect(toList());
         return new LambdaExpr(parameters, ctx.expression());
     }
 
@@ -40,9 +42,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             case "|":
                 return left || right;
             default:
-                throw new RuntimeException(
-                        String.format("Unsupported operator: ", ctx.operator.getText())
-                );
+                throw new RuntimeException(String.format("Unsupported operator: ", ctx.operator.getText()));
         }
     }
 
@@ -56,9 +56,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             case "/":
                 return left.divide(right);
             default:
-                throw new RuntimeException(
-                        String.format("Unsupported operator: ", ctx.operator.getText())
-                );
+                throw new RuntimeException(String.format("Unsupported operator: ", ctx.operator.getText()));
         }
     }
 
@@ -85,9 +83,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             case "!=":
                 return left.compareTo(right) != 0;
             default:
-                throw new RuntimeException(
-                        String.format("Unsupported operator: ", ctx.operator.getText())
-                );
+                throw new RuntimeException(String.format("Unsupported operator: ", ctx.operator.getText()));
         }
     }
 
@@ -106,9 +102,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             case "-":
                 return left.subtract(right);
             default:
-                throw new RuntimeException(
-                        String.format("Unsupported operator: ", ctx.operator.getText())
-                );
+                throw new RuntimeException(String.format("Unsupported operator: ", ctx.operator.getText()));
         }
     }
 
@@ -164,10 +158,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         if (functions.containsKey(name)) {
             throw new RuntimeException(String.format("Function \"%s\" already defined.", name));
         }
-        var function = new Function(
-                name,
-                (LambdaExpr) ctx.lambda().accept(this)
-        );
+        var function = new Function(name, (LambdaExpr) ctx.lambda().accept(this));
         functions.put(name, function);
         return function;
     }
@@ -182,6 +173,16 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     @Override
     public Object visitBooleanLiteralExpr(GrogParser.BooleanLiteralExprContext ctx) {
         return Boolean.valueOf(ctx.value.getText());
+    }
+
+    @Override
+    public Object visitType(TypeContext ctx) {
+        var type = new Type(
+            ctx.name.getText(), 
+            ctx.functions.stream().map((f) -> (Function) f.accept(this)).collect(toSet())
+        );
+        symbols.peek().addType(type);
+        return type;
     }
 
     
