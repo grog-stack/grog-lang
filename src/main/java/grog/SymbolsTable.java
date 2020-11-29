@@ -7,17 +7,15 @@ public class SymbolsTable {
     private final SymbolsTable parent;
     private final Map<String, Object> symbols = new HashMap<>();
     private final Map<String, Type> types = new HashMap<>();
+    private final Map<String, Function> functions = new HashMap<>();
 
     public SymbolsTable(SymbolsTable parent) {
         this.parent = parent;
     }
     
     public Object get(String name) {
-        if (!symbols.containsKey(name)) {
-            if (parent != null) {
-                return parent.get(name);
-            }
-            throw new RuntimeException(String.format("Could not resolve reference \"%s\"", name));
+        if (!symbols.containsKey(name) && parent != null) {
+            return parent.get(name);
         }
         return symbols.get(name);
     }
@@ -33,10 +31,25 @@ public class SymbolsTable {
         return types.get(name);
     }
 
-    public void addType(Type type) {
+    public void add(Type type) {
         if (types.containsKey(type.name())) {
             throw new RuntimeException(String.format("Type %s already defined.", type.name()));
         }
+        types.put(type.name(), type);
+    }
+
+    public Function function(String name) {
+        if (!functions.containsKey(name)) {
+            return parent != null ? parent.function(name) : null;
+        }
+        return functions.get(name);
+    }
+
+    public void add(Function function) {
+        if (types.containsKey(function.name())) {
+            throw new RuntimeException(String.format("Function %s already defined.", function.name()));
+        }
+        functions.put(function.name(), function);
     }
     
 }

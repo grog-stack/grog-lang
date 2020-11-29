@@ -10,6 +10,10 @@ public class Function implements Lambda {
         this.name = name;
         this.lambda = lambda;
     }
+
+    public String name() {
+        return name;
+    }
     
     public List<Parameter> parameters() {
         return lambda.parameters();

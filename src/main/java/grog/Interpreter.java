@@ -1,19 +1,15 @@
 package grog;
 
+import grog.GrogParser.TypeContext;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 import static java.util.stream.Collectors.toSet;
 
-import grog.GrogParser.AtomExprContext;
-import grog.GrogParser.TypeContext;
 
 import static java.util.stream.Collectors.toList;
 
 public class Interpreter extends GrogBaseVisitor<Object> {
 
-    private final Map<String, Function> functions = new HashMap<>();
     private final Stack<SymbolsTable> symbols = new Stack<>();
 
     @Override
@@ -113,25 +109,35 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 
     @Override
     public Object visitFunctionCall(GrogParser.FunctionCallContext ctx) {
-        var symbolsTable = new SymbolsTable(symbols.peek());
+        var symbolsTable = symbols.peek();
         var name = ctx.name.getText();
-        var evaluable = (Lambda) functions.get(name);
-        if (evaluable == null) {
-            var lambda = symbolsTable.get(name);
-            if (!(lambda instanceof Lambda)) {
-                throw new RuntimeException(String.format("Symbol \"%s\" is not a function.", name));
-            }
-            evaluable = (Lambda) lambda;
-        }
+        var evaluable = lambdaOrFunction(symbolsTable, name);
         var parameters = evaluable.parameters();
+        var newSymbolsTable = new SymbolsTable(symbolsTable);
         for (int i = 0; i < parameters.size(); i++) {
-            symbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
+            newSymbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
         }
         try {
-            symbols.push(symbolsTable);
+            symbols.push(newSymbolsTable);
             return evaluable.evaluate(this);
         } finally {
             symbols.pop();
+        }
+    }
+
+    private Lambda lambdaOrFunction(SymbolsTable symbolsTable, String name) {
+        var symbol = symbolsTable.get(name);
+        if (symbol != null) {
+            if (!(symbol instanceof Lambda)) {
+                throw new RuntimeException(String.format("Symbol \"%s\" is not a lambda.", name));
+            }
+            return (Lambda) symbol;
+        } else {
+            var function = symbolsTable.function(name);
+            if (function == null) {
+                throw new RuntimeException(String.format("Symbol \"%s\" not found.", name));
+            }
+            return function;
         }
     }
 
@@ -155,11 +161,12 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     @Override
     public Object visitFunction(GrogParser.FunctionContext ctx) {
         var name = ctx.name.getText();
-        if (functions.containsKey(name)) {
+        var symbolsTable = symbols.peek();
+        if (symbolsTable.function(name) != null) {
             throw new RuntimeException(String.format("Function \"%s\" already defined.", name));
         }
         var function = new Function(name, (LambdaExpr) ctx.lambda().accept(this));
-        functions.put(name, function);
+        symbolsTable.add(function);
         return function;
     }
 
@@ -181,7 +188,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             ctx.name.getText(), 
             ctx.functions.stream().map((f) -> (Function) f.accept(this)).collect(toSet())
         );
-        symbols.peek().addType(type);
+        symbols.peek().add(type);
         return type;
     }
 
