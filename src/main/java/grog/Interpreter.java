@@ -3,6 +3,7 @@ package grog;
 import grog.GrogParser.TypeContext;
 import java.math.BigDecimal;
 import java.util.Stack;
+
 import static java.util.stream.Collectors.toSet;
 
 
@@ -174,7 +175,11 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     public Object visitProgram(GrogParser.ProgramContext ctx) {
         symbols.push(new SymbolsTable(null));
         ctx.function().forEach((f) -> f.accept(this));
-        return ctx.expression().accept(this);
+        Object lastValue = null;
+        for (GrogParser.StatementContext statement : ctx.statements) {
+            lastValue = statement.accept(this);
+        }
+        return lastValue;
     }
 
     @Override
@@ -192,5 +197,13 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         return type;
     }
 
+	@Override
+	public Object visitVariableDecl(GrogParser.VariableDeclContext ctx) {
+        var value = ctx.value.accept(this);
+		symbols.peek().put(ctx.name.getText(), value);
+		return value;
+	}
+
+    
     
 }

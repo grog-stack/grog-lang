@@ -51,5 +51,12 @@ public class SymbolsTable {
         }
         functions.put(function.name(), function);
     }
+
+    public void add(String name, Object value) {
+        if (symbols.containsKey(name)) {
+            throw new RuntimeException(String.format("The symbol %s is already defined.", name));
+        }
+        symbols.put(name, value);
+    }
     
 }
