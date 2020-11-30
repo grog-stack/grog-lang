@@ -1,6 +1,6 @@
 grammar Grog;
 
-program: (type |function)* expression?;
+program: (type |function)* statements+=statement+;
 
 type: 
     TYPE name=IDENTIFIER ASSIGN (
@@ -11,8 +11,12 @@ type:
 
 function:  FUNC name=IDENTIFIER lambda;
 
+statement
+    : VARIABLE name=IDENTIFIER ASSIGN value=expression #VariableDecl
+    ;
+
 expression
-    : left=expression POWER<assoc=right> right=expression #PowerExpr
+    : <assoc=right> left=expression POWER right=expression #PowerExpr
     | left=expression (operator=TIMES | operator=DIVIDE) right=expression #TimesExpr
     | left=expression (operator=PLUS | operator=MINUS) right=expression #PlusExpr
     | left=expression (operator=GREATER | operator=LESS | operator=GREATER_OR_EQUAL | operator=LESS_OR_EQUAL | EQUAL | DIFFERENT) right=expression #ComparisonExpr
@@ -39,6 +43,7 @@ parameter: name=IDENTIFIER (COLON typeDecl=typeDeclaration)?;
 
 typeDeclaration: IDENTIFIER;
 
+VARIABLE: 'var';
 TYPE: 'type';
 LBRACE: '{';
 RBRACE: '}';
