@@ -23,3 +23,7 @@ var list1 <- [1,2,3]
 var emptyList <- []
 var emptyMap <- { <- }
 var map1 <- {1 <- true, 2 <- false, 3 <- true}
+var text1 <- "Hello, world!"
+var text2 <- "Hello,
+world
+!"

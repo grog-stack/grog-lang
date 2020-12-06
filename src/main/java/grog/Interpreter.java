@@ -231,4 +231,9 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         return new MapEntry(ctx.key.accept(this), ctx.value.accept(this));
     }
 
+	@Override
+	public Object visitTextLiteralExpr(GrogParser.TextLiteralExprContext ctx) {
+		return ctx.value.getText();
+	}
+
 }
