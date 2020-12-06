@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 import java.util.Stack;
 
 import static java.util.stream.Collectors.toSet;
-
-
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.Collections.emptyMap;
 
 public class Interpreter extends GrogBaseVisitor<Object> {
 
@@ -204,6 +204,31 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 		return value;
 	}
 
+	@Override
+	public Object visitSetLiteralExpr(GrogParser.SetLiteralExprContext ctx) {
+		return ctx.values.stream().map((v) -> v.accept(this)).collect(toSet());
+	}
     
+	@Override
+	public Object visitListLiteralExpr(GrogParser.ListLiteralExprContext ctx) {
+		return ctx.values.stream().map((v) -> v.accept(this)).collect(toList());
+	}
     
+	@Override
+	public Object visitMapLiteralExpr(GrogParser.MapLiteralExprContext ctx) {
+        return ctx.entries.stream()
+            .map((e) -> (MapEntry) e.accept(this))
+            .collect(
+                toMap(
+                    (e) -> e.key(), 
+                    (e) -> e.value()
+                    )
+            );
+	}
+        
+    @Override
+    public Object visitMapEntry(GrogParser.MapEntryContext ctx) {
+        return new MapEntry(ctx.key.accept(this), ctx.value.accept(this));
+    }
+
 }

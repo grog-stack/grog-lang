@@ -5,3 +5,4 @@ target/
 .vscode/
 nb-configuration.xml
 nbactions.xml
+src/main/antlr4/grog/.antlr/

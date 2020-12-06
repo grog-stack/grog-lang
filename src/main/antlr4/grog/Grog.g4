@@ -5,11 +5,11 @@ program: (type |function)* statements+=statement+;
 type: 
     TYPE name=IDENTIFIER ASSIGN (
         functions+=function
-        | LBRACE (functions+=function)+ RBRACE
+        | LCBRACKET (functions+=function)+ RCBRACKET
     )
     ;
 
-function:  FUNC name=IDENTIFIER lambda;
+function: FUNC name=IDENTIFIER lambda;
 
 statement
     : VARIABLE name=IDENTIFIER ASSIGN value=expression #VariableDecl
@@ -24,6 +24,9 @@ expression
     | NOT value=expression #NegativeExpr
     | functionCall #FunctionCallExpr
     | value=lambda #LambdaExpr
+    | LCBRACKET (ASSIGN | entries+=mapEntry (COMMA entries+=mapEntry)*) RCBRACKET #MapLiteralExpr
+    | LCBRACKET (values+=expression (COMMA values+=expression)*)? RCBRACKET #SetLiteralExpr
+    | LSBRACKET (values+=expression (COMMA values+=expression)*)? RSBRACKET #ListLiteralExpr
     | atom #AtomExpr
     ;
 
@@ -37,6 +40,10 @@ atom
     | value=BOOLEAN #BooleanLiteralExpr
     ;
 
+mapEntry
+    : key=expression ASSIGN value=expression
+    ;
+
 lambda: LPAREN (parameters+=parameter (COMMA parameters+=parameter)* )? RPAREN ASSIGN expression;
 
 parameter: name=IDENTIFIER (COLON typeDecl=typeDeclaration)?;
@@ -45,8 +52,10 @@ typeDeclaration: IDENTIFIER;
 
 VARIABLE: 'var';
 TYPE: 'type';
-LBRACE: '{';
-RBRACE: '}';
+LCBRACKET: '{';
+RCBRACKET: '}';
+LSBRACKET: '[';
+RSBRACKET: ']';
 FUNC: 'func';
 COMMA: ',';
 SEMICOLON: ';';

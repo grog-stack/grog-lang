@@ -17,3 +17,9 @@ type T1 <- {
 var a <-1
 var b <- 2
 var test <- a > b
+var set1 <- {1,2,3}
+var emptySet <- {}
+var list1 <- [1,2,3]
+var emptyList <- []
+var emptyMap <- { <- }
+var map1 <- {1 <- true, 2 <- false, 3 <- true}
