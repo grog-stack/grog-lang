@@ -38,7 +38,7 @@ atom
     : value=IDENTIFIER #ReferenceExpr
     | value=NUMBER #NumberExpr
     | value=BOOLEAN #BooleanLiteralExpr
-    | value=TEXT #TextLiteralExpr
+    | value=STRING #StringLiteralExpr
     ;
 
 mapEntry
@@ -80,7 +80,7 @@ COLON: ':';
 AND: '&';
 OR: '|';
 BOOLEAN: 'true' | 'false';
-TEXT: '"' (ESCAPE|.)*? '"' ;
+STRING: '"' (ESCAPE|.)*? '"' ;
 fragment ESCAPE : '\\"' | '\\\\' ; // 2-char sequences \" and \\
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
 NUMBER: DIGIT+ ('.' DIGIT+)?;

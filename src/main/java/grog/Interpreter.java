@@ -232,8 +232,9 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     }
 
 	@Override
-	public Object visitTextLiteralExpr(GrogParser.TextLiteralExprContext ctx) {
-		return ctx.value.getText();
+	public Object visitStringLiteralExpr(GrogParser.StringLiteralExprContext ctx) {
+        var text = ctx.value.getText();
+		return text.substring(1, text.length()-1);
 	}
 
 }
