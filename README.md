@@ -1,1 +1,3 @@
-# grog-lang
+## Grog Language
+
+A programming language.
