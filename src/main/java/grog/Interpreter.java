@@ -1,13 +1,16 @@
 package grog;
 
-import grog.GrogParser.TypeContext;
-import java.math.BigDecimal;
-import java.util.Stack;
-
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toSet;
+
+import grog.GrogParser.IndexedReferenceExprContext;
+import grog.GrogParser.TypeContext;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 
 public class Interpreter extends GrogBaseVisitor<Object> {
 
@@ -235,6 +238,22 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 	public Object visitStringLiteralExpr(GrogParser.StringLiteralExprContext ctx) {
         var text = ctx.value.getText();
 		return text.substring(1, text.length()-1);
+	}
+
+	@Override
+	public Object visitIndexedReferenceExpr(IndexedReferenceExprContext ctx) {
+        var value = ctx.value.accept(this);
+        var index = ctx.index.accept(this);
+        if (value instanceof List) {
+            return ((List) value).get(((BigDecimal) index).intValue());
+        } else if (value instanceof java.util.Map) {
+            return ((Map) value).get(index);
+        } else {
+            var start = ctx.value.start;
+            throw new RuntimeException(
+                String.format("[%d:%d] Not an indexed value.", start.getLine(), start.getCharPositionInLine())
+            );
+        }
 	}
 
 }

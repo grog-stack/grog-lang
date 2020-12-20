@@ -27,6 +27,7 @@ expression
     | LCBRACKET (ASSIGN | entries+=mapEntry (COMMA entries+=mapEntry)*) RCBRACKET #MapLiteralExpr
     | LCBRACKET (values+=expression (COMMA values+=expression)*)? RCBRACKET #SetLiteralExpr
     | LSBRACKET (values+=expression (COMMA values+=expression)*)? RSBRACKET #ListLiteralExpr
+    | value=expression LSBRACKET index=expression RSBRACKET #IndexedReferenceExpr
     | atom #AtomExpr
     ;
 
