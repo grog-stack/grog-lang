@@ -30,4 +30,4 @@ world
 var c <- [1,2,3,4][0] // Test for indexed reference on array
 var d <- [2,4,8,16][1+1] // Test for indexed reference on array with an expression
 var e <- map1[1] // Test for indexed reference on map
-var f <- {"a" <- 1, "b" <- 2, "c" <- 3}["c"]
+var f1 <- {"a" <- 1, "b" <- 2, "c" <- 3}["c"]

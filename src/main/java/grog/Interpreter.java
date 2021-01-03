@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import org.antlr.v4.runtime.Token;
+
 
 
 public class Interpreter extends GrogBaseVisitor<Object> {
@@ -119,7 +121,18 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         var parameters = evaluable.parameters();
         var newSymbolsTable = new SymbolsTable(symbolsTable);
         for (int i = 0; i < parameters.size(); i++) {
-            newSymbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
+            try {
+				newSymbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
+			} catch (SymbolAlreadyDefined e) {
+				throw new RuntimeException(
+                    String.format(
+                        "[%d:%d] Symbol %s is already defined.",
+                        ctx.name.getLine(),
+                        ctx.name.getCharPositionInLine(),
+                        name
+                    )
+                )
+			}
         }
         try {
             symbols.push(newSymbolsTable);
@@ -131,18 +144,12 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 
     private Lambda lambdaOrFunction(SymbolsTable symbolsTable, String name) {
         var symbol = symbolsTable.get(name);
-        if (symbol != null) {
-            if (!(symbol instanceof Lambda)) {
-                throw new RuntimeException(String.format("Symbol \"%s\" is not a lambda.", name));
-            }
-            return (Lambda) symbol;
-        } else {
-            var function = symbolsTable.function(name);
-            if (function == null) {
-                throw new RuntimeException(String.format("Symbol \"%s\" not found.", name));
-            }
-            return function;
+        if (symbol == null) {
+            throw new RuntimeException(String.format("Symbol %s not found.", name));
+        } else if (!(symbol instanceof Lambda) && !(symbol instanceof Function)) {
+            throw new RuntimeException(String.format("Symbol \"%s\" is not a lambda nor a function.", name));
         }
+        return (Lambda) symbol;
     }
 
     @Override
@@ -165,12 +172,8 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     @Override
     public Object visitFunction(GrogParser.FunctionContext ctx) {
         var name = ctx.name.getText();
-        var symbolsTable = symbols.peek();
-        if (symbolsTable.function(name) != null) {
-            throw new RuntimeException(String.format("Function \"%s\" already defined.", name));
-        }
         var function = new Function(name, (LambdaExpr) ctx.lambda().accept(this));
-        symbolsTable.add(function);
+        putInSymbolsTableOrThrowError(ctx.name, function);
         return function;
     }
 
@@ -192,18 +195,19 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 
     @Override
     public Object visitType(TypeContext ctx) {
+        var name = ctx.name.getText();
         var type = new Type(
-            ctx.name.getText(), 
+            name, 
             ctx.functions.stream().map((f) -> (Function) f.accept(this)).collect(toSet())
         );
-        symbols.peek().add(type);
+        putInSymbolsTableOrThrowError(ctx.name, type);
         return type;
     }
 
 	@Override
 	public Object visitVariableDecl(GrogParser.VariableDeclContext ctx) {
         var value = ctx.value.accept(this);
-		symbols.peek().put(ctx.name.getText(), value);
+        putInSymbolsTableOrThrowError(ctx.name, value);
 		return value;
 	}
 
@@ -254,6 +258,21 @@ public class Interpreter extends GrogBaseVisitor<Object> {
                 String.format("[%d:%d] Not an indexed value.", start.getLine(), start.getCharPositionInLine())
             );
         }
-	}
+    }
+    
+    private void putInSymbolsTableOrThrowError(Token name, Object value) {
+        try {
+            symbols.peek().put(name.getText(), value);
+        } catch (SymbolAlreadyDefined ex) {
+            throw new RuntimeException(
+                String.format(
+                    "[%d:%d] Symbol %s is already defined.", 
+                    name.getLine(),
+                    name.getCharPositionInLine(),
+                    name.getText()
+                )
+            );
+        }
+    }
 
 }
