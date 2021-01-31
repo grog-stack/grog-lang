@@ -131,7 +131,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
                         ctx.name.getCharPositionInLine(),
                         name
                     )
-                )
+                );
 			}
         }
         try {
