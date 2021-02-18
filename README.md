@@ -55,14 +55,14 @@ This expression
 
     1^2*3+4/5
 
-Is equal to this on
+Is equal to this one:
 
     ((1^2)*3)+(4/5)
 
 ### Boolean expressions
 
 * ```!```: not
-* ```&```, ```|```: and, or
+* ```&``` (and), ```|``` (or)
 
 This expression:
 
@@ -111,7 +111,7 @@ to this:
 
     func f(x, y) <- x+y
 
-Functions are first-order elements in Grog. You can pass them pass parameters:
+Functions are first-order elements in Grog. You can pass them as parameters:
 
     func f(f1, x) <-f1(y)
     func g(x) <- x+x
