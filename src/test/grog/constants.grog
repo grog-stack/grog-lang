@@ -1,0 +1,5 @@
+const PI <- 3.14
+
+var radius <- 2
+
+var diameter <- PI * radius ^ 2

@@ -1,6 +1,6 @@
 grammar Grog;
 
-program: (type |function)* statements+=statement+;
+program: (type | function | constant)* statements+=statement+;
 
 type: 
     TYPE name=IDENTIFIER ASSIGN (
@@ -10,6 +10,9 @@ type:
     ;
 
 function: FUNC name=IDENTIFIER lambda;
+
+constant
+    : CONSTANT name=IDENTIFIER ASSIGN value=expression;
 
 statement
     : VARIABLE name=IDENTIFIER ASSIGN value=expression #VariableDecl
@@ -52,6 +55,7 @@ parameter: name=IDENTIFIER (COLON typeDecl=typeDeclaration)?;
 
 typeDeclaration: IDENTIFIER;
 
+CONSTANT: 'const';
 VARIABLE: 'var';
 TYPE: 'type';
 LCBRACKET: '{';

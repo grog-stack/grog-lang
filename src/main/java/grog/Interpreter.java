@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import org.antlr.v4.runtime.Token;
-
-
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Interpreter extends GrogBaseVisitor<Object> {
 
@@ -110,7 +109,9 @@ public class Interpreter extends GrogBaseVisitor<Object> {
 
     @Override
     public Object visitReferenceExpr(GrogParser.ReferenceExprContext ctx) {
-        return symbols.peek().get(ctx.value.getText());
+        var symbolsTable = symbols.peek();
+        var value = symbolsTable.get(ctx.value.getText());
+        return value instanceof Expression ? ((Expression) value).evaluate(symbolsTable) : value;
     }
 
     @Override
@@ -122,9 +123,9 @@ public class Interpreter extends GrogBaseVisitor<Object> {
         var newSymbolsTable = new SymbolsTable(symbolsTable);
         for (int i = 0; i < parameters.size(); i++) {
             try {
-				newSymbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
-			} catch (SymbolAlreadyDefined e) {
-				throw new RuntimeException(
+                newSymbolsTable.put(parameters.get(i).name(), ctx.parameters.get(i).accept(this));
+            } catch (SymbolAlreadyDefined e) {
+                throw new RuntimeException(
                     String.format(
                         "[%d:%d] Symbol %s is already defined.",
                         ctx.name.getLine(),
@@ -132,7 +133,7 @@ public class Interpreter extends GrogBaseVisitor<Object> {
                         name
                     )
                 );
-			}
+            }
         }
         try {
             symbols.push(newSymbolsTable);
@@ -180,72 +181,71 @@ public class Interpreter extends GrogBaseVisitor<Object> {
     @Override
     public Object visitProgram(GrogParser.ProgramContext ctx) {
         symbols.push(new SymbolsTable(null));
-        ctx.function().forEach((f) -> f.accept(this));
         Object lastValue = null;
-        for (GrogParser.StatementContext statement : ctx.statements) {
-            lastValue = statement.accept(this);
+        for (ParseTree child : ctx.children) {
+            lastValue = child.accept(this);
         }
         return lastValue;
     }
 
     @Override
     public Object visitBooleanLiteralExpr(GrogParser.BooleanLiteralExprContext ctx) {
-        return Boolean.valueOf(ctx.value.getText());
+        return new Literal(Boolean.valueOf(ctx.value.getText()));
     }
 
     @Override
     public Object visitType(TypeContext ctx) {
         var name = ctx.name.getText();
         var type = new Type(
-            name, 
+            name,
             ctx.functions.stream().map((f) -> (Function) f.accept(this)).collect(toSet())
         );
         putInSymbolsTableOrThrowError(ctx.name, type);
         return type;
     }
 
-	@Override
-	public Object visitVariableDecl(GrogParser.VariableDeclContext ctx) {
+    @Override
+    public Object visitVariableDecl(GrogParser.VariableDeclContext ctx) {
         var value = ctx.value.accept(this);
         putInSymbolsTableOrThrowError(ctx.name, value);
-		return value;
-	}
+        return value;
+    }
 
-	@Override
-	public Object visitSetLiteralExpr(GrogParser.SetLiteralExprContext ctx) {
-		return ctx.values.stream().map((v) -> v.accept(this)).collect(toSet());
-	}
-    
-	@Override
-	public Object visitListLiteralExpr(GrogParser.ListLiteralExprContext ctx) {
-		return ctx.values.stream().map((v) -> v.accept(this)).collect(toList());
-	}
-    
-	@Override
-	public Object visitMapLiteralExpr(GrogParser.MapLiteralExprContext ctx) {
+    @Override
+    public Object visitSetLiteralExpr(GrogParser.SetLiteralExprContext ctx) {
+        return ctx.values.stream().map((v) -> v.accept(this)).collect(toSet());
+    }
+
+    @Override
+    public Object visitListLiteralExpr(GrogParser.ListLiteralExprContext ctx) {
+        return ctx.values.stream().map((v) -> v.accept(this)).collect(toList());
+    }
+
+    @Override
+    public Object visitMapLiteralExpr(GrogParser.MapLiteralExprContext ctx) {
         return ctx.entries.stream()
             .map((e) -> (MapEntry) e.accept(this))
             .collect(
                 toMap(
-                    (e) -> e.key(), 
+                    (e) -> e.key(),
                     (e) -> e.value()
-                    )
+                )
             );
-	}
-        
+    }
+
     @Override
     public Object visitMapEntry(GrogParser.MapEntryContext ctx) {
         return new MapEntry(ctx.key.accept(this), ctx.value.accept(this));
     }
 
-	@Override
-	public Object visitStringLiteralExpr(GrogParser.StringLiteralExprContext ctx) {
+    @Override
+    public Object visitStringLiteralExpr(GrogParser.StringLiteralExprContext ctx) {
         var text = ctx.value.getText();
-		return text.substring(1, text.length()-1);
-	}
+        return text.substring(1, text.length() - 1);
+    }
 
-	@Override
-	public Object visitIndexedReferenceExpr(IndexedReferenceExprContext ctx) {
+    @Override
+    public Object visitIndexedReferenceExpr(IndexedReferenceExprContext ctx) {
         var value = ctx.value.accept(this);
         var index = ctx.index.accept(this);
         if (value instanceof List) {
@@ -259,14 +259,21 @@ public class Interpreter extends GrogBaseVisitor<Object> {
             );
         }
     }
-    
+
+    @Override
+    public Object visitConstant(GrogParser.ConstantContext ctx) {
+        var constant = new Constant(ctx.name.getText(), ctx.value.accept(this));
+        putInSymbolsTableOrThrowError(ctx.name, constant);
+        return constant;
+    }
+
     private void putInSymbolsTableOrThrowError(Token name, Object value) {
         try {
             symbols.peek().put(name.getText(), value);
         } catch (SymbolAlreadyDefined ex) {
             throw new RuntimeException(
                 String.format(
-                    "[%d:%d] Symbol %s is already defined.", 
+                    "[%d:%d] Symbol %s is already defined.",
                     name.getLine(),
                     name.getCharPositionInLine(),
                     name.getText()

@@ -4,6 +4,14 @@ A programming language, just for fun. All these specifications might change in f
 
 ## The basics
 
+### Constants
+
+You can define constants with ```const```. You must specify a name and a value. The assignment operator is ```<-```.
+
+    const PI = 3.14
+
+Once a constante is defined, its value cannot be modified.
+
 ### Variables
 
 You define variables with ```var```. You must specify a name and a value. The assignment operator is ```<-```.
