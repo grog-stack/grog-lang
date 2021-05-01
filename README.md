@@ -147,7 +147,7 @@ Multi-line comments begin with ```/*``` and end with ```*/```.
 
 ## Writing a program
 
-A program contains as many declarations as you need (functions, and variables) and then all
+A program contains as many declarations as you need (functions, variables, and constants) and then all
 the statements you want to evalute. The results of each statement will be printed to console.
 
 Here's an example:
