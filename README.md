@@ -86,11 +86,12 @@ Arrays are fixed length sequenques of values. You specify the values between squ
 
     var odd_numbers <- [1,3,5]
     var even_numbers <- [2,4,6]
+    var empty_list <- []
 
 You can reference an element by its offset from the begin of the array.
 
-    var first_odd <- odd_numbers[0] // This assignes the value 1
-    var first_even <- even_numbers[2] // This assignes the value 6
+    var a <- odd_numbers[0]
+    var b <- even_numbers[2]
 
 ### Sets
 
@@ -98,6 +99,7 @@ A set is a collection of distinct elements. You specify the values between curly
 
     var odd_numbers = {1,3,5}
     var even_numbers = {2,4,6}
+    var empty_set = {}
 
 ### Maps
 
@@ -107,6 +109,7 @@ A map is an indexed collection of elements. Each element is referenced by a key.
         "guybrush" <- "Guybrush Threepwood",
         "elaine" <- "Elaine Marley"
     }
+    var empty_map = {<-} // Do you think this is ugly?
 
 ### Functions
 
