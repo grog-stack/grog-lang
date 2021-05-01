@@ -34,7 +34,7 @@ These are types of which you can create new values with a literal expression.
 
 #### Number
 
-There's one one numeric type. All numbers are expressed in base 10.
+There's one numeric type. All numbers are expressed in base 10.
 
 #### Text
 
@@ -51,7 +51,7 @@ Boolean literals are ```true``` and ```false```.
 
     var engage <- true
 
-    ### Arithmetic expressions
+### Arithmetic expressions
 
 The usual rules apply. These are the arithmetic operators, in order of precedence:
 
