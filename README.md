@@ -157,3 +157,15 @@ Here's an example:
     var x <- f(1)
     x // Prints 2
     g(x+1) // Prints 5
+
+## Standard functions
+
+### Collections
+
+#### ```size```
+
+Returns the size of a ```list```, ```set```, or ```map```.
+
+Examples:
+
+    size([1,2,3])

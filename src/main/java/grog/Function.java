@@ -19,7 +19,7 @@ public class Function implements Lambda {
         return lambda.parameters();
     }
     
-    public Object evaluate(GrogBaseVisitor visitor) {
-        return lambda.evaluate(visitor);
+    public Object evaluate(SymbolsTable symbolsTable, GrogBaseVisitor visitor) {
+        return lambda.evaluate(symbolsTable, visitor);
     }
 }

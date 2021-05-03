@@ -6,5 +6,5 @@ public interface Lambda {
 
     List<Parameter> parameters();
 
-    Object evaluate(GrogBaseVisitor visitor);
+    Object evaluate(SymbolsTable symbolsTable, GrogBaseVisitor visitor);
 }

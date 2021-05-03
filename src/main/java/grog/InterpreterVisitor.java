@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toSet;
 
 import grog.GrogParser.IndexedReferenceExprContext;
 import grog.GrogParser.TypeContext;
+import grog.functions.Size;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,22 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class InterpreterVisitor extends GrogBaseVisitor<Object> {
 
+    private final Map<String, Lambda> STANDARD_FUNCTIONS = Map.of(
+        "size", new Size()
+    );
+    
     private final Stack<SymbolsTable> symbols = new Stack<>();
+    
+    public InterpreterVisitor() {
+        symbols.push(new SymbolsTable(null));
+        STANDARD_FUNCTIONS.entrySet().forEach((e) -> {
+            try {
+                putInSymbolsTableOrThrowError(e.getKey(), e.getValue());
+            } catch (SymbolAlreadyDefined ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+    }
 
     @Override
     public Object visitTypeDeclaration(GrogParser.TypeDeclarationContext ctx) {
@@ -137,7 +153,7 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
         }
         try {
             symbols.push(newSymbolsTable);
-            return evaluable.evaluate(this);
+            return evaluable.evaluate(symbols.peek(), this);
         } finally {
             symbols.pop();
         }
@@ -180,7 +196,7 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
 
     @Override
     public Object visitProgram(GrogParser.ProgramContext ctx) {
-        symbols.push(new SymbolsTable(null));
+        symbols.push(new SymbolsTable(symbols.peek()));
         Object lastValue = null;
         for (ParseTree child : ctx.children) {
             lastValue = child.accept(this);
@@ -269,7 +285,7 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
 
     private void putInSymbolsTableOrThrowError(Token name, Object value) {
         try {
-            symbols.peek().put(name.getText(), value);
+            putInSymbolsTableOrThrowError(name.getText(), value);
         } catch (SymbolAlreadyDefined ex) {
             throw new RuntimeException(
                 String.format(
@@ -280,6 +296,10 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
                 )
             );
         }
+    }
+    
+    private void putInSymbolsTableOrThrowError(String name, Object value) throws SymbolAlreadyDefined {
+        symbols.peek().put(name, value);
     }
 
 }

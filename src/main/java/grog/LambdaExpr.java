@@ -13,7 +13,7 @@ public class LambdaExpr implements Lambda {
         this.expression = expression;
     }
 
-    public Object evaluate(GrogBaseVisitor visitor) {
+    public Object evaluate(SymbolsTable symbolsTable, GrogBaseVisitor visitor) {
         return expression.accept(visitor);
     }
 

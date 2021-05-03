@@ -12,7 +12,8 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <antlr.version>4.7.2</antlr.version>
-        <junit.version>5.6.2</junit.version>
+        <junit.jupiter.version>5.7.1</junit.jupiter.version>
+        <junit.platform.version>1.5.2</junit.platform.version>
     </properties>
     <dependencies>
         <dependency> 
@@ -20,10 +21,22 @@
             <artifactId>antlr4</artifactId> 
             <version>${antlr.version}</version> 
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -44,6 +57,10 @@
                 <configuration>
                     <visitor>true</visitor>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
             </plugin>
         </plugins>
     </build>
