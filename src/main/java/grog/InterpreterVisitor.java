@@ -17,7 +17,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class InterpreterVisitor extends GrogBaseVisitor<Object> {
 
     private final Map<String, Lambda> STANDARD_FUNCTIONS = Map.of(
-        "size", new Size()
+        "size", new Size(),
+        "map", new grog.functions.Map()
     );
     
     private final Stack<SymbolsTable> symbols = new Stack<>();
@@ -163,7 +164,7 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
         var symbol = symbolsTable.get(name);
         if (symbol == null) {
             throw new RuntimeException(String.format("Symbol %s not found.", name));
-        } else if (!(symbol instanceof Lambda) && !(symbol instanceof Function)) {
+        } else if (!(symbol instanceof Lambda)) {
             throw new RuntimeException(String.format("Symbol \"%s\" is not a lambda nor a function.", name));
         }
         return (Lambda) symbol;
@@ -302,4 +303,14 @@ public class InterpreterVisitor extends GrogBaseVisitor<Object> {
         symbols.peek().put(name, value);
     }
 
+    public SymbolsTable pushNewSymbolsTable() {
+        var symbolsTable = new SymbolsTable(symbols.peek());
+        symbols.push(symbolsTable);
+        return symbolsTable;
+    }
+    
+    public SymbolsTable popSymbolsTable() {
+        return symbols.pop();
+    }
+    
 }

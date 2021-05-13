@@ -169,3 +169,12 @@ Returns the size of a ```list```, ```set```, or ```map```.
 Examples:
 
     size([1,2,3])
+
+#### ```map```
+
+Transforms all elements of the given ```collection```, using the provided ```function```.
+
+Example:
+
+    map({1,2,3}, (x) <- x*2) // Yields {2,4,6}
+
